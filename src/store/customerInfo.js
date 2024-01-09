@@ -1,8 +1,25 @@
 export default {
-    state: {
+  state: {
+    customer: {
+      Firstname: '',
+      Lastname: '',
+      DateOfBirth: '',
+      PhoneNumber: '',
+      Email: '',
+      BankAccountNumber: '',
     },
-    getters: {
+  },
+  mutations: {
+    setCustomer(state, payload) {
+      state.customer = payload;
     },
-    mutations: {
+  },
+  actions: {
+    updateCustomer({ commit }, customerData) {
+      commit('setCustomer', customerData);
     },
-  };
+  },
+  getters: {
+    getCustomer: (state) => state.customer,
+  },
+};

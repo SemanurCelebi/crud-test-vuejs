@@ -12,7 +12,8 @@
       <input type="date" id="dob" v-model="customer.DateOfBirth" required>
 
       <label for="phone">Phone Number:</label>
-      <input type="tel" id="phone" v-model="customer.PhoneNumber" placeholder="0612345678" required>
+      <input type="tel" id="phone" v-model="customer.PhoneNumber" @input="validatePhoneNumber" placeholder="0612345678" required onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+      <span v-if="phoneError" class="error-message">{{ phoneError }}</span>
 
       <label for="email">E-mail:</label>
       <input type="email" id="email" v-model="customer.Email" required @input="validateEmail">
@@ -25,13 +26,23 @@
       <button type="submit" :disabled="!isFormValid">Submit</button>
     </form>
 
-    
+    <div v-if="formSubmitted">
+      <p>Form başarıyla gönderildi!</p>
+      <p>Ad: {{ customer.Firstname }}</p>
+      <p>Soyad: {{ customer.Lastname }}</p>
+      <p>Doğum Tarihi: {{ customer.DateOfBirth }}</p>
+      <p>Telefon Numarası: {{ customer.PhoneNumber }}</p>
+      <p>E-posta: {{ customer.Email }}</p>
+      <p>Banka Hesap Numarası: {{ customer.BankAccountNumber }}</p>
+    </div>
     <router-link to="/customerList">Go to List Page</router-link>
   </div>
 </template>
 
 <script>
 import {EmailValidation, BankAccountValidation} from "../validation/customerValidation";
+
+import { PhoneNumberUtil } from 'google-libphonenumber';
 // import { mapState } from 'vuex';
 export default {
   name: 'CustomerAdd',
@@ -48,6 +59,7 @@ export default {
       formSubmitted: false,
       emailError: '',
       bankAccountError: '',
+      phoneError: '',
     };
   },
   methods: {
@@ -68,13 +80,30 @@ export default {
       const bankAccountValidator = new BankAccountValidation();
       this.bankAccountError = bankAccountValidator.validate(this.customer.BankAccountNumber)
     },
+    validatePhoneNumber() {
+      const phoneUtil = PhoneNumberUtil.getInstance();
+      try {
+        const phoneNumberObject = phoneUtil.parse(this.customer.PhoneNumber, 'NL'); // 'TR' for Turkey
+        console.log('phoneNumberObject : '+ phoneNumberObject)
+        const isValid = phoneUtil.isValidNumber(phoneNumberObject);
+        console.log('isValid : '+ isValid)
+
+        if (isValid) {
+          this.phoneError = '';
+        }else{
+          this.phoneError = 'Enter a valid phone number';
+        }
+      } catch (error) {
+        this.phoneError = 'Enter a valid phone number';
+      }
+    },
   },
   
   computed: {
     isFormValid() {
+      // Formun tamamı geçerli mi kontrolü
       return this.emailError === '' && this.bankAccountError === '';
     },
-    
 }
   
 }

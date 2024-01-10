@@ -12,7 +12,7 @@
       <input type="date" id="dob" v-model="customer.DateOfBirth" required>
 
       <label for="phone">Phone Number:</label>
-      <input type="tel" id="phone" v-model="customer.PhoneNumber" @input="validatePhoneNumber" placeholder="0612345678" required onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+      <input type="tel" id="phone" v-model="customer.PhoneNumber" @input="validatePhoneNumber" placeholder="06________" required onkeypress="return event.charCode >= 48 && event.charCode <= 57">
       <span v-if="phoneError" class="error-message">{{ phoneError }}</span>
 
       <label for="email">E-mail:</label>
@@ -25,68 +25,72 @@
 
       <button type="submit" :disabled="!isFormValid">Submit</button>
     </form>
-
-    <div v-if="formSubmitted">
-      <p>Form başarıyla gönderildi!</p>
-      <p>Ad: {{ customer.Firstname }}</p>
-      <p>Soyad: {{ customer.Lastname }}</p>
-      <p>Doğum Tarihi: {{ customer.DateOfBirth }}</p>
-      <p>Telefon Numarası: {{ customer.PhoneNumber }}</p>
-      <p>E-posta: {{ customer.Email }}</p>
-      <p>Banka Hesap Numarası: {{ customer.BankAccountNumber }}</p>
+    <div class="listPage">
+      <router-link to="/customerList">Go to List Page</router-link>
     </div>
-    <router-link to="/customerList">Go to List Page</router-link>
+    
   </div>
 </template>
 
 <script>
-import {EmailValidation, BankAccountValidation} from "../validation/customerValidation";
+import {EmailValidation, BankAccountValidation, UniqueEmailValidation, UniqueFirstLastnameDateOfBirthValidation} from "../validation/customerValidation";
 
 import { PhoneNumberUtil } from 'google-libphonenumber';
-// import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 export default {
   name: 'CustomerAdd',
   data() {
     return {
-      customer: {
-        Firstname: '',
-        Lastname: '',
-        DateOfBirth: '',
-        PhoneNumber: '',
-        Email: '',
-        BankAccountNumber: ''
-      },
-      formSubmitted: false,
       emailError: '',
       bankAccountError: '',
       phoneError: '',
     };
   },
   methods: {
+    ...mapActions("customerInfo", ["addCustomerToLocalStorage"]),
     submitForm() {
       if (this.isFormValid) {
-        // Form bilgilerini konsola yazdır veya başka bir işlemi gerçekleştir
-        console.log('Form Bilgileri:', this.customer);
-        this.formSubmitted = true;
+        const customer = this.customer;
+
+        const existingData = JSON.parse(localStorage.getItem('customers')) || [];
+
+        const uniqueEmailValidation = new UniqueEmailValidation();
+        let isCustomerExistWithSameEmail = uniqueEmailValidation.validate(existingData, customer.Email);
+
+        const uniqueFirstLastnameDateOfBirthValidation = new UniqueFirstLastnameDateOfBirthValidation();
+        let isCustomerExistWithSameCustomerInfo = uniqueFirstLastnameDateOfBirthValidation.validate(existingData, customer.Firstname, customer.Lastname, customer.DateOfBirth);
+
+        if (isCustomerExistWithSameEmail || isCustomerExistWithSameCustomerInfo) {
+          isCustomerExistWithSameCustomerInfo ? alert('Another customer exist with this first name, last name and date of birth.') : "";
+          isCustomerExistWithSameEmail ? alert('Another customer exist with this email.') :  "";
+          return;
+        }
+        else {
+          this.addCustomerToLocalStorage({existingData, customer});
+          alert('The form information has been saved successfully.')
+          this.formClear();
+        }
+
       } else {
-        alert('Lütfen formu doğru şekilde doldurun.');
+        alert('Please fill out the form correctly.');
       }
     },
+
     validateEmail() {
       const emailValidator = new EmailValidation();
       this.emailError = emailValidator.validate(this.customer.Email);
     },
+
     validateBankAccount() {
       const bankAccountValidator = new BankAccountValidation();
       this.bankAccountError = bankAccountValidator.validate(this.customer.BankAccountNumber)
     },
+
     validatePhoneNumber() {
       const phoneUtil = PhoneNumberUtil.getInstance();
       try {
         const phoneNumberObject = phoneUtil.parse(this.customer.PhoneNumber, 'NL'); // 'TR' for Turkey
-        console.log('phoneNumberObject : '+ phoneNumberObject)
         const isValid = phoneUtil.isValidNumber(phoneNumberObject);
-        console.log('isValid : '+ isValid)
 
         if (isValid) {
           this.phoneError = '';
@@ -97,14 +101,25 @@ export default {
         this.phoneError = 'Enter a valid phone number';
       }
     },
+
+    formClear(){
+      const customer = this.customer;
+      customer.Firstname = '',
+      customer.Lastname = '',
+      customer.DateOfBirth = '',
+      customer.PhoneNumber = '',
+      customer.Email = '',
+      customer.BankAccountNumber = ''
+    }
   },
-  
   computed: {
     isFormValid() {
-      // Formun tamamı geçerli mi kontrolü
       return this.emailError === '' && this.bankAccountError === '';
     },
-}
+    ...mapState({
+      customer: state => state.customerInfo.customer,
+    })
+  }
   
 }
 </script>

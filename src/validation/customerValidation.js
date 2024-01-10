@@ -23,7 +23,21 @@ class BankAccountValidation {
   }
 }
 
-export { EmailValidation, BankAccountValidation};
+class UniqueEmailValidation {
+  validate( customers, email ) {
+    const isCustomerExistWithSameEmail = customers.some(existingCustomer => existingCustomer.Email === email);
+    return isCustomerExistWithSameEmail;
+  }
+}
+
+class UniqueFirstLastnameDateOfBirthValidation {
+  validate(customers, firstName, lastName, dateOfBirth){
+    const isCustomerExistWithSameCustomerInfo = customers.some(existingCustomer =>  existingCustomer.Firstname === firstName && existingCustomer.Lastname === lastName && existingCustomer.DateOfBirth === dateOfBirth );
+    return isCustomerExistWithSameCustomerInfo;
+  }
+}
+
+export { EmailValidation, BankAccountValidation, UniqueEmailValidation, UniqueFirstLastnameDateOfBirthValidation};
 
 
 

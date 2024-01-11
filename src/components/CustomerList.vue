@@ -6,6 +6,9 @@
             Firstname:{{customer.Firstname}} - Lastname:{{customer.Lastname}} - DateOfBirth:{{customer.DateOfBirth}} - PhoneNumber:{{customer.PhoneNumber}} - Email:{{customer.Email}} - BankAccount:{{customer.BankAccountNumber}}
           </li>
        </ul>
+       <div class="link">
+          <router-link to="/">Go to Add Page</router-link>
+       </div>
     </div>
   </template>
   

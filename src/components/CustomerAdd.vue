@@ -25,7 +25,7 @@
 
       <button type="submit" :disabled="!isFormValid">Submit</button>
     </form>
-    <div class="listPage">
+    <div class="link">
       <router-link to="/customerList">Go to List Page</router-link>
     </div>
     
@@ -33,10 +33,17 @@
 </template>
 
 <script>
-import {EmailValidation, BankAccountValidation, UniqueEmailValidation, UniqueFirstLastnameDateOfBirthValidation} from "../validation/customerValidation";
 
-import { PhoneNumberUtil } from 'google-libphonenumber';
+import { 
+  emailValidation, 
+  bankAccountValidation, 
+  uniqueEmailValidation, 
+  uniqueFirstLastnameDateOfBirthValidation,
+  phoneNumberValidation
+} from "../validation/customerValidation";
+
 import { mapState, mapActions } from 'vuex';
+
 export default {
   name: 'CustomerAdd',
   data() {
@@ -54,11 +61,9 @@ export default {
 
         const existingData = JSON.parse(localStorage.getItem('customers')) || [];
 
-        const uniqueEmailValidation = new UniqueEmailValidation();
-        let isCustomerExistWithSameEmail = uniqueEmailValidation.validate(existingData, customer.Email);
+        let isCustomerExistWithSameEmail = uniqueEmailValidation(existingData, customer.Email);
 
-        const uniqueFirstLastnameDateOfBirthValidation = new UniqueFirstLastnameDateOfBirthValidation();
-        let isCustomerExistWithSameCustomerInfo = uniqueFirstLastnameDateOfBirthValidation.validate(existingData, customer.Firstname, customer.Lastname, customer.DateOfBirth);
+        let isCustomerExistWithSameCustomerInfo = uniqueFirstLastnameDateOfBirthValidation(existingData, customer.Firstname, customer.Lastname, customer.DateOfBirth);
 
         if (isCustomerExistWithSameEmail || isCustomerExistWithSameCustomerInfo) {
           isCustomerExistWithSameCustomerInfo ? alert('Another customer exist with this first name, last name and date of birth.') : "";
@@ -77,29 +82,15 @@ export default {
     },
 
     validateEmail() {
-      const emailValidator = new EmailValidation();
-      this.emailError = emailValidator.validate(this.customer.Email);
+      this.emailError = emailValidation(this.customer.Email);
     },
 
     validateBankAccount() {
-      const bankAccountValidator = new BankAccountValidation();
-      this.bankAccountError = bankAccountValidator.validate(this.customer.BankAccountNumber)
+      this.bankAccountError = bankAccountValidation(this.customer.BankAccountNumber);
     },
 
     validatePhoneNumber() {
-      const phoneUtil = PhoneNumberUtil.getInstance();
-      try {
-        const phoneNumberObject = phoneUtil.parse(this.customer.PhoneNumber, 'NL'); // 'TR' for Turkey
-        const isValid = phoneUtil.isValidNumber(phoneNumberObject);
-
-        if (isValid) {
-          this.phoneError = '';
-        }else{
-          this.phoneError = 'Enter a valid phone number';
-        }
-      } catch (error) {
-        this.phoneError = 'Enter a valid phone number';
-      }
+      this.phoneError = phoneNumberValidation(this.customer.PhoneNumber);
     },
 
     formClear(){

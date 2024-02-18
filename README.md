@@ -1,9 +1,6 @@
-# CRUD Code Test 
+# Customer CRUD Project 
 
-Please read each note very carefully!
-Feel free to add/change the project structure to a clean architecture to your view.
-
-Create a simple CRUD application with VueJ that implements the below model:
+A simple CRUD application with VueJS that implements the below model:
 ```
 Customer {
 	Firstname
@@ -14,28 +11,25 @@ Customer {
 	BankAccountNumber
 }
 ```
-## Practices and patterns (Must):
 
-- TDD [Wiki](https://en.wikipedia.org/wiki/Test-driven_development)
-- [DDD](https://en.wikipedia.org/wiki/Domain-driven_design)
-- [BDD](https://en.wikipedia.org/wiki/Behavior-driven_development)
-- Clean git commits that shows your work progress.
+### Validations
 
-### Validations (Must)
+- During createtion; validated the phone number to be a valid *mobile* number only (We used  [Google LibPhoneNumber](https://github.com/google/libphonenumber) to validate mobile number).
 
-- During Create; validate the phone number to be a valid *mobile* number only (You are required to use [Google LibPhoneNumber](https://github.com/google/libphonenumber) to validate mobile number).
+- A valid email and a valid account number has been checked before submitting the form.
 
-- A Valid email and a valid account number must be checked before submitting the form.
+- A browser local storage has been created to store the list of customers.
 
-- Create a Browser local storage to store the list of customers.
+- It was checked that the customers' "Name", "Surname" and "Date of Birth" information were unique in the database.
 
-- Customers must be unique in the database: By `Firstname`, `Lastname` and `DateOfBirth`.
+- "Email" is unique in local storage.
 
-- Email must be unique in the local storage or memory array
+### Tests
 
-### Nice to do
+- Unit test codes of all validations are written in the following directory
+[Unit Tests](tests/unit/validation.spec.js)
 
-- [Microfrontend](https://en.wikipedia.org/wiki/Microfrontend)
 
-### Delivery (Must)
-- Please clone this repository in a new GitHub repository in private mode and share with ID: `mason-chase` in private mode on github.com, make sure you do not erase my commits and then create a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) (code review).
+![General UI](image.png)
+
+![Validations](image-1.png)
